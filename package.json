@@ -1,5 +1,5 @@
 {
-  "name": "frog-list-rt",
+  "name": "frog-list-rn",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
