@@ -45,7 +45,6 @@ export const categoriesReducer = createSlice({
           .addCase(fetchCategories.fulfilled, (state, action) => {
             state.categories = action.payload?.categories || [];
           })
-          
           .addMatcher(
             isAllOf(isPending, isAsyncThunkAction),
             (state) => {

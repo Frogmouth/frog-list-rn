@@ -2,7 +2,7 @@ import { Pressable, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { categories, productsFilters } from "@/store";
+import { categories, categoriesStatus, productsFilters } from "@/store";
 import { useEffect } from "react";
 import { fetchCategories } from "@/store/slice/categories.slice";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -16,13 +16,14 @@ export default function FiltersDrawer(props:FiltersDrawerProps) {
 
     const dispatch = useAppDispatch();
     const allCategories = useAppSelector(categories);
+    const status = useAppSelector(categoriesStatus);
     const appliedFilters = useAppSelector(productsFilters);
 
     const themeColor = useColorScheme() || 'light';
 
     useEffect(() => {
-        if(allCategories.length < 1) dispatch(fetchCategories())
-    });
+        status === 0 && dispatch(fetchCategories())
+    }, [status]);
 
     return <ThemedView darkColor="rgb(34, 34, 46)" style={{
         width: '100%',

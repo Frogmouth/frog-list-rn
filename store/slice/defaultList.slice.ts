@@ -201,6 +201,13 @@ export const defaultListSlice = createSlice({
                 const {list_items, list} = action.payload;
                 state.items = list_items.map((item:any) => listItemsFactory(item)) as any[];
                 state.list = list;
+                state.status = 2;
+            })
+            .addCase(fetchDefault.pending, (state) => {
+                state.status = 1;
+            })
+            .addCase(fetchDefault.rejected, (state) => {
+                state.status = 3;
             })
             .addCase(deleteDefault.fulfilled, (state) => {
                 state.list = initialState.list;
@@ -248,21 +255,8 @@ export const defaultListSlice = createSlice({
                 }
             })
             .addMatcher(
-                isAllOf(isPending, isAsyncThunkAction),
-                (state) => {
-                    state.status = 1
-                }
-            )
-            .addMatcher(
-                isAllOf(isFulfilled, isAsyncThunkAction),
-                (state) => {
-                    state.status = 2
-                }
-            )
-            .addMatcher(
                 isAllOf(isRejected,isAsyncThunkAction),
                 (state, action) => {
-                    state.status = 3
                     state.error = action.error.message;
                     action.error.message && showMessage({
                         message: action.error.message,

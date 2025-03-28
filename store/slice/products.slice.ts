@@ -18,52 +18,50 @@ export interface ProductsState {
     error?: string,
     suggestions? : Tables<'products'>[],
     filters: productFilter[],
+    isFiltered: boolean,
 }
 
 const initialState:ProductsState = {
     products: [],
     suggestions: undefined,
-    hasMore: true,
+    hasMore: false,
     status: 0,
     count: 0,
     error: undefined,
     filters: [],
+    isFiltered: false,
 }
 
 export const fetchProducts = createAppAsyncThunk(
     'products/fetchProducts',
     async (args:undefined|{
-      applyFilters?: boolean
-    }, {getState}) => {
-        try {
-            let currentIndex = 0
-            let to = 39;
-            let applyFilters = !!args?.applyFilters;
-            if(applyFilters) {
-              if(!args?.applyFilters && !getState().prdocuts.hasMore) throw 'Tutti i prodotti sono stati mostrati.'
-              currentIndex = getState().prdocuts.products.length;
-              to += currentIndex;
-            }
-            
-            let partial = supabase.from('products')
-              .select('*', { count: 'exact'})
-              .order('name')
-            
-            if(applyFilters) {
-              getState().prdocuts.filters.forEach((filter) => {
-                partial.eq(filter.term, filter.value)
-              })
-            }
+      applyFilters?: boolean,
+      reset?: boolean,
+    }, {getState, dispatch}) => {
+          if(!!args?.reset) dispatch(clearFilterProducts());
+          let currentIndex = 0
+          let to = 39;
+          let applyFilters = !!args?.applyFilters || getState().prdocuts.isFiltered;
+          if(!applyFilters) {
+            currentIndex = getState().prdocuts.products.length;
+            to += currentIndex;
+          }
+          
+          let partial = supabase.from('products')
+            .select('*', { count: 'exact'})
 
-            const { data:products, count, error } = await partial.range(currentIndex, to);
+          if(applyFilters) {
+            let orQuery = getState().prdocuts.filters.map((filter) => {
+              return [filter.term, '.eq.', filter.value].join('');
+            });
+            if(orQuery && orQuery.length > 0) partial.or(orQuery.join(', '));
+          }
 
-            if(error) throw error.message;
-            
-            return { products, count, applyFilters};
+          const { data:products, count, error } = await partial.order('name').range(currentIndex, to);
 
-        } catch (e) {
-            throw 'Errore durante il recupero dei prodotti';
-        }
+          if(error) throw error.message;
+          
+          return { products, count, applyFilters};
     }
   )
 
@@ -110,9 +108,16 @@ export const productsReducer = createSlice({
       clearSuggestions: (state) => {
         state.suggestions = undefined;
       },
+      clearFilterProducts: (state) => {
+        state.filters = [];
+        state.products = [];
+        state.isFiltered = false;
+        state.hasMore = false;
+      },
       toggleFilterProduts: (state, {payload}) => {
-        if(!!state.filters.find((filter) => filter.term === payload.term && filter.value === filter.value)) {
-          state.filters = state.filters.filter((filter) => filter.term !== payload.term && filter.value !== filter.value)
+        const appliedIndex = state.filters.findIndex((filter) => filter.value === payload.value && filter.term === payload.term);
+        if(appliedIndex > -1) {
+          state.filters = state.filters.filter((filter) => filter.value !== payload.value || filter.term !== payload.term)
         } else {
           state.filters = [...state.filters, payload];
         }
@@ -123,12 +128,21 @@ export const productsReducer = createSlice({
           .addCase(fetchProducts.fulfilled, (state, action) => {
             if(action.payload.applyFilters) {
               state.products = action.payload?.products || [];
+              state.isFiltered = true;
             } else {
               state.filters = [];
+              state.isFiltered = false;
               state.products = [...state.products, ...action.payload?.products];
-            } 
+            }
             state.count = action.payload?.count || 0;
+            state.status = 2;
             state.hasMore = state.products.length < state.count;
+          })
+          .addCase(fetchProducts.pending, (state, action) => {
+            state.status = 1;
+          })
+          .addCase(fetchProducts.rejected, (state, action) => {
+            state.status = 3;
           })
           .addCase(createProduct.fulfilled, (state, action) => {
             state.products.push(action.payload)
@@ -138,21 +152,8 @@ export const productsReducer = createSlice({
             state.suggestions = action.payload;
           })
           .addMatcher(
-            isAllOf(isPending, isAsyncThunkAction),
-            (state) => {
-                state.status = 1
-            }
-          )
-          .addMatcher(
-              isAllOf(isFulfilled, isAsyncThunkAction),
-              (state) => {
-                  state.status = 2
-              }
-          )
-          .addMatcher(
               isAllOf(isRejected,isAsyncThunkAction),
               (state, action) => {
-                  state.status = 3
                   state.error = action.error.message;
                   if(action.error.message)
                   showMessage({
@@ -165,7 +166,7 @@ export const productsReducer = createSlice({
 });
 
 // Export the generated action creators for use in components
-export const { clearSuggestions, toggleFilterProduts } = productsReducer.actions
+export const { clearSuggestions, toggleFilterProduts, clearFilterProducts } = productsReducer.actions
 
 // Export the slice reducer for use in the store configuration
 export default productsReducer.reducer

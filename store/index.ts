@@ -35,7 +35,9 @@ export const productsCategories = (state: RootState) => state.prdocuts.products.
   return (item.category !== null && result.indexOf(item.category) >= 0) ? [...result, item.category] : result;
 }, [] as (number)[]);
 export const productsFilters = (state: RootState) => state.prdocuts.filters;
+export const productsIsFiltered = (state: RootState) => state.prdocuts.isFiltered;
 
 export const prodcutSuggestions = (state: RootState) => state.prdocuts.suggestions;
 
 export const categories = (state: RootState) => state.categories.categories;
+export const categoriesStatus = (state: RootState) => state.categories.status;
