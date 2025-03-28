@@ -113,6 +113,7 @@ export type Database = {
           id: number
           is_default: boolean
           is_deleted: boolean
+          is_shopping: boolean | null
         }
         Insert: {
           closed_at?: string | null
@@ -120,6 +121,7 @@ export type Database = {
           id?: number
           is_default?: boolean
           is_deleted?: boolean
+          is_shopping?: boolean | null
         }
         Update: {
           closed_at?: string | null
@@ -127,6 +129,7 @@ export type Database = {
           id?: number
           is_default?: boolean
           is_deleted?: boolean
+          is_shopping?: boolean | null
         }
         Relationships: []
       }

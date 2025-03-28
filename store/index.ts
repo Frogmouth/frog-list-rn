@@ -28,8 +28,13 @@ export const defaultListStatus = (state: RootState) => state.defaultList.status;
 export const productsStatus = (state: RootState) => state.prdocuts.status;
 
 export const defaultList = (state: RootState) => state.defaultList.list;
+
 export const defaultItems = (state: RootState) => state.defaultList.items;
 export const products = (state: RootState) => state.prdocuts;
+export const productsCategories = (state: RootState) => state.prdocuts.products.reduce((result, item) => {
+  return (item.category !== null && result.indexOf(item.category) >= 0) ? [...result, item.category] : result;
+}, [] as (number)[]);
+export const productsFilters = (state: RootState) => state.prdocuts.filters;
 
 export const prodcutSuggestions = (state: RootState) => state.prdocuts.suggestions;
 

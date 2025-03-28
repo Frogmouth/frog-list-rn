@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,6 +12,7 @@ import FlashMessage from "react-native-flash-message";
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { rootStore } from '@/store';
 import { ThemedView } from '@/components/ThemedView';
+import { MyDarkTheme, MyLightTheme } from '@/constants/Themes';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -34,27 +35,28 @@ export default function RootLayout() {
 
   return (
     <SafeAreaView style={{flex:1}}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ThemeProvider value={colorScheme === 'dark' ? MyDarkTheme : MyLightTheme}>
             <ThemedView>
               <Provider store={rootStore}>
                   <Stack>
                     <Stack.Screen
                         name="index"
                         options={{
-                          title: 'Home'
+                          title: 'Home',
+                          headerShown: false,
                         }}
                       />
                     <Stack.Screen
                         name="products"
                         options={{
+                          headerShown: false,
                           title: 'Prodotti'
                         }}
                       />
                     <Stack.Screen
                       name="addproduct"
                       options={{
-                        title: 'Nuovo prodotto',
-                        presentation: 'transparentModal',
+                        title: 'Nuovo prodotto'
                       }}
                     />
                   </Stack>

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, TextInput  } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { categories } from '@/store';
@@ -11,6 +10,9 @@ import { addProduct } from '@/store/slice/defaultList.slice';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { ThemedTextInput } from '@/components/ui/ThemedTextInput';
+import { ThemedPicker } from '@/components/ui/ThemedPicker';
+import { ThemedButton } from '@/components/ui/ThemedButton';
 
 export default function ProductsList() {
 
@@ -41,25 +43,23 @@ export default function ProductsList() {
 
     return(
         <ThemedView style={s.stackContent}>
-            <ThemedText>Nome</ThemedText>
             <ThemedView style={s.inputWrapper}>
-                <TextInput value={productName} onChangeText={(text) => setProductName(text)} style={s.textInput} />
+                <ThemedTextInput label="Nome" value={productName} onChangeText={(text) => setProductName(text)} />
             </ThemedView>
-            <ThemedText>Categoria</ThemedText>
-            <ThemedView style={s.inputWrapper}>
-                <Picker
-                    onValueChange={(itemValue:number, itemIndex) => setSelectedCategory(itemValue)}
-                >
-                    {prodcutCategories.map((category) => <Picker.Item key={`${category.id}_picker`} value={category.id} label={category.name || `Categoria ${category.id}`} />)}
-                </Picker>
-            </ThemedView>
-            <Pressable onPress={() => submit()}><ThemedText>CREA</ThemedText></Pressable>
-            <Pressable onPress={() => submit(true)}><ThemedText>CREA & AGGIUNGI</ThemedText></Pressable>
+            <ThemedPicker
+                label="Categoria"
+                onValueChange={(itemValue, itemIndex) => setSelectedCategory(itemValue as number)}
+                items={prodcutCategories.map(category => ({
+                    key: `${category.id}_picker`,
+                    value: category.id,
+                    label: category.name || `Categoria ${category.id}`,
+                }))} />
+            <ThemedButton onPress={() => submit()} type="primary">CREA</ThemedButton>
+            <ThemedButton onPress={() => submit(true)} type="secondary">CREA & AGGIUNGI</ThemedButton>
         </ThemedView>)
 }
 
 const s = StyleSheet.create({
-    stackContent: {paddingVertical:8, paddingHorizontal:16, gap:8},
-    inputWrapper: {backgroundColor: '#666', flexGrow:0},
-    textInput: {color: 'white', padding:8}
+    stackContent: {paddingVertical:8, paddingHorizontal:16, gap:24},
+    inputWrapper: {flexGrow:0},
 });

@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useCallback, useState } from 'react';
 import { useRouter } from 'expo-router';
 
@@ -11,9 +11,10 @@ import { debounce } from '@/store/utils';
 import ButtonAddProduct from '@/components/ui/ButtonAddProduct';
 import { ThemedText } from './ThemedText';
 import { ThemedView } from './ThemedView';
+import { ThemedTextInput } from './ui/ThemedTextInput';
 
 const debounced = debounce((arg:any, dispatch:any) => dispatch(suggestedProducts(arg)), 1500);
-const debouncedSuggestedProducts = (arg:any) => (dispatch:any) => debounced(arg, dispatch)
+const debouncedSuggestedProducts = (arg:any) => (dispatch:any) => debounced.exec(arg, dispatch)
 
 export default function SearchSuggestions() {
     
@@ -30,6 +31,7 @@ export default function SearchSuggestions() {
                 query: query
             }));
         } else {
+            debounced.abort();
             if(suggestions) {
                 dispatch(clearSuggestions())
             };
@@ -40,10 +42,10 @@ export default function SearchSuggestions() {
         {suggestions && <Pressable onPressIn={() => dispatch(clearSuggestions())} style={s.awayClicker}><></></Pressable>}
         <View style={s.componentWrapper}>
             <View style={[s.searchWrapper, suggestions ? s.active : s.quiet]}>
-                <TextInput
+                <ThemedTextInput
+                    placeholder='Aggiungi prodotti...'
                     value={searchQuery} 
-                    onChangeText={(query) => performSearch(query)} 
-                    style={s.searchField} />
+                    onChangeText={(query) => performSearch(query)} />
             </View>
             {suggestions && <ThemedView darkColor='#333' style={s.suggestionsWrapper}>
                 <FlatList
@@ -78,7 +80,7 @@ const s = StyleSheet.create({
     searchWrapper : {flexDirection:'row', alignItems: 'center',borderTopStartRadius: 5, },
     active: { borderBottomStartRadius: 0 },
     quiet: { borderBottomStartRadius: 5 },
-    searchField : {fontSize: 16, flexGrow:1,backgroundColor: "#333", height:36, color: 'white', paddingHorizontal: 8},
+    
     suggestionsWrapper : {position:'absolute', top:'100%',width:'100%', padding:8, borderBottomStartRadius: 5, borderBottomEndRadius: 5},
     suggestion: { flexDirection: 'row', justifyContent: 'space-between', padding: 8, },
     nosuggestion: { padding: 8, },

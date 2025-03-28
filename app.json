@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frog-list-rt",
+    "name": "Frog List",
     "slug": "frog-list-rt",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.froglistrt"
     },
     "web": {
       "bundler": "metro",

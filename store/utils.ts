@@ -1,12 +1,26 @@
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
+
+let debounceTimers: { [key: string]: NodeJS.Timeout } = {};
+
+const abortDebounce = (uuid:string) => {
+  if (typeof debounceTimers[uuid] !== 'undefined') clearTimeout(debounceTimers[uuid]);
+  delete debounceTimers[uuid];
+}
 
 export const debounce = (func:Function, delay:number) => {
-  let timeoutId:NodeJS.Timeout;
+  const uuid = uuidv4();
+  return {
+    exec: (...args:any) => {
+      clearTimeout(debounceTimers[uuid]);
 
-  return (...args:any) => {
-    clearTimeout(timeoutId);
-
-    timeoutId = setTimeout(() => {
-      func.apply(this, args);
-    }, delay);
+      debounceTimers[uuid] = setTimeout(() => {
+        delete debounceTimers[uuid];
+        func.apply(this, args);
+      }, delay);
+    },
+    abort: () => {
+      abortDebounce(uuid);
+    }
   };
 };
